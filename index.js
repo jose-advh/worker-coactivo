@@ -7,12 +7,13 @@ import PDFParser from "pdf2json";
 const app = express();
 app.use(express.json());
 
-// Conexión Supabase
+// Conexión con Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE
 );
 
+// Endpoint principal
 app.post("/procesar", async (req, res) => {
   try {
     const { expediente_id, archivo_path } = req.body;
@@ -28,19 +29,21 @@ app.post("/procesar", async (req, res) => {
     const arrayBuffer = await data.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Extraer texto
+    // Extraer texto del archivo
     let textoExtraido = "";
     if (archivo_path.toLowerCase().endsWith(".pdf")) {
       textoExtraido = await extraerTextoPDF(buffer);
     } else if (archivo_path.toLowerCase().endsWith(".docx")) {
       const { value } = await mammoth.extractRawText({ buffer });
       textoExtraido = value;
+    } else {
+      throw new Error("Formato de archivo no soportado");
     }
 
-    // Llamar a la IA (DeepSeek)
+    // Prompt de análisis jurídico con IA
     const prompt = `
       Eres un abogado experto en cobro coactivo colombiano.
-      Analiza el siguiente texto y devuelve únicamente un objeto JSON.
+      Analiza el siguiente texto y devuelve únicamente un objeto JSON. Nada de texto introductorio, solo el JSON.
 
       Debes extraer:
       - nombre del deudor
@@ -71,6 +74,7 @@ app.post("/procesar", async (req, res) => {
       ${textoExtraido}
       """`;
 
+    // Llamada a DeepSeek en OpenRouter
     const iaResponse = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -93,8 +97,25 @@ app.post("/procesar", async (req, res) => {
     );
 
     const dataIA = await iaResponse.json();
-    const content = dataIA?.choices?.[0]?.message?.content || "{}";
-    const json = JSON.parse(content.replace(/```json|```/g, "").trim());
+    const textoIA = dataIA?.choices?.[0]?.message?.content || "{}";
+
+    // Limpieza robusta del JSON
+    const limpio = textoIA
+      .replace(/```json|```/g, "")
+      .replace(/[^\{]*({[\s\S]*})[^\}]*$/, "$1")
+      .trim();
+
+    let json = {};
+    try {
+      json = JSON.parse(limpio);
+    } catch (e) {
+      console.error("Error al parsear JSON de IA:", e);
+      json = {
+        tipo_titulo: "",
+        semaforo: "ROJO",
+        observacion: "Error al interpretar la respuesta de la IA",
+      };
+    }
 
     // Actualizar registro en Supabase
     await supabase
@@ -113,7 +134,7 @@ app.post("/procesar", async (req, res) => {
   }
 });
 
-// Función para extraer texto de un PDF usando pdf2json
+// Función auxiliar para extraer texto de PDF usando pdf2json
 async function extraerTextoPDF(buffer) {
   return new Promise((resolve, reject) => {
     const pdfParser = new PDFParser();
@@ -132,6 +153,7 @@ async function extraerTextoPDF(buffer) {
   });
 }
 
+// Inicialización del servidor
 app.listen(process.env.PORT || 3000, () =>
   console.log(`Worker corriendo en puerto ${process.env.PORT || 3000}`)
 );
