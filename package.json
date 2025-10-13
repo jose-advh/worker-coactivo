@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.0",
+    "express": "^5.1.0",
+    "mammoth": "^1.11.0",
+    "node-fetch": "^3.3.2",
+    "pdfjs-dist": "^5.4.296"
+  }
+}
