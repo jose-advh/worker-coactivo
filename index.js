@@ -1,9 +1,8 @@
 import express from "express";
 import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import "pdfjs-dist/build/pdf.worker.mjs";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
+import PDFParser from "pdf2json";
 
 const app = express();
 app.use(express.json());
@@ -32,14 +31,7 @@ app.post("/procesar", async (req, res) => {
     // Extraer texto
     let textoExtraido = "";
     if (archivo_path.toLowerCase().endsWith(".pdf")) {
-      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-      let texto = "";
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        texto += content.items.map((t) => t.str).join(" ");
-      }
-      textoExtraido = texto;
+      textoExtraido = await extraerTextoPDF(buffer);
     } else if (archivo_path.toLowerCase().endsWith(".docx")) {
       const { value } = await mammoth.extractRawText({ buffer });
       textoExtraido = value;
@@ -120,6 +112,25 @@ app.post("/procesar", async (req, res) => {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
+
+// Función para extraer texto de un PDF usando pdf2json
+async function extraerTextoPDF(buffer) {
+  return new Promise((resolve, reject) => {
+    const pdfParser = new PDFParser();
+
+    pdfParser.on("pdfParser_dataError", (errData) =>
+      reject(errData.parserError)
+    );
+    pdfParser.on("pdfParser_dataReady", (pdfData) => {
+      const texto = pdfData.Pages.map((page) =>
+        page.Texts.map((t) => decodeURIComponent(t.R[0].T)).join(" ")
+      ).join("\n");
+      resolve(texto);
+    });
+
+    pdfParser.parseBuffer(buffer);
+  });
+}
 
 app.listen(process.env.PORT || 3000, () =>
   console.log(`Worker corriendo en puerto ${process.env.PORT || 3000}`)
