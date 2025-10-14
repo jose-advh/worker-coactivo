@@ -212,10 +212,7 @@ Usa títulos (#), subtítulos (##) y negritas (**texto**) para dar formato como 
 Datos para usar en el documento:
 Datos del expediente:
 ${JSON.stringify(analisis, null, 2)}
-
-Texto base del expediente:
 """
-${textoBase}
 """
 `;
 
