@@ -134,53 +134,47 @@ app.post("/procesar", async (req, res) => {
         throw new Error(data.error.message || "Error en OpenRouter");
 
       const textoIA = data?.choices?.[0]?.message?.content.trim() || "{}";
+      let limpio = textoIA
+        .replace(/```json|```/g, "")
+        .replace(/[^\{]*({[\s\S]*})[^\}]*$/, "$1")
+        .trim();
 
+      try {
+        json = JSON.parse(limpio);
+        console.log("✅ JSON parseado correctamente:", json);
+      } catch (e) {
+        console.error("❌ Error al parsear JSON de IA:", e.message);
+        json = {
+          tipo_titulo: "",
+          semaforo: "ROJO",
+          observacion: "Error al interpretar la respuesta de la IA",
+        };
+      }
+
+      // 🗃️ Actualizar registro en Supabase
+      try {
+        const { error: updateError } = await supabase
+          .from("expedientes")
+          .update({
+            titulo: json.tipo_titulo,
+            semaforo: json.semaforo,
+            observaciones: json.observacion,
+          })
+          .eq("id", expediente_id);
+
+        if (updateError) throw updateError;
+        console.log(`✅ Expediente ${expediente_id} actualizado en Supabase`);
+      } catch (err) {
+        console.error("❌ Error al actualizar Supabase:", err.message);
+        throw err;
+      }
       console.log("✅ Respuesta recibida de la IA:");
       console.log(textoIA.slice(0, 500)); // limitar a 500 chars
+      res.json({ ok: true, resultado: json });
     } catch (err) {
       console.error("❌ Error al comunicarse con la IA:", err.message);
       throw err;
     }
-
-    // 🧹 Limpiar JSON de la IA
-    let limpio = textoIA
-      .replace(/```json|```/g, "")
-      .replace(/[^\{]*({[\s\S]*})[^\}]*$/, "$1")
-      .trim();
-
-    let json;
-    try {
-      json = JSON.parse(limpio);
-      console.log("✅ JSON parseado correctamente:", json);
-    } catch (e) {
-      console.error("❌ Error al parsear JSON de IA:", e.message);
-      json = {
-        tipo_titulo: "",
-        semaforo: "ROJO",
-        observacion: "Error al interpretar la respuesta de la IA",
-      };
-    }
-
-    // 🗃️ Actualizar registro en Supabase
-    try {
-      const { error: updateError } = await supabase
-        .from("expedientes")
-        .update({
-          titulo: json.tipo_titulo,
-          semaforo: json.semaforo,
-          observaciones: json.observacion,
-        })
-        .eq("id", expediente_id);
-
-      if (updateError) throw updateError;
-      console.log(`✅ Expediente ${expediente_id} actualizado en Supabase`);
-    } catch (err) {
-      console.error("❌ Error al actualizar Supabase:", err.message);
-      throw err;
-    }
-
-    // 🟢 Respuesta final
-    res.json({ ok: true, resultado: json });
   } catch (err) {
     console.error("💥 Error general en worker:", err);
     res.status(500).json({ ok: false, error: err.message });
