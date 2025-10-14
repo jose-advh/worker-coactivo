@@ -181,39 +181,22 @@ async function actualizarExpediente(expediente_id, json) {
 async function generarDocumentoIA(analisis, textoBase) {
   const prompt = `
 Eres un abogado experto en cobro coactivo colombiano.
-Siguiendo lo que dice el art 826 del estatuto tributario:
+Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
 
-Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano, sin usar formato Markdown ni listas. Usa solo texto plano, con títulos en mayúsculas sostenidas y saltos de línea entre secciones.
+Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano.
+Usa lenguaje jurídico formal, propio de actos administrativos, y estructura con títulos (#), subtítulos (##) y negritas (**texto**).
 
-El documento debe incluir las siguientes secciones en este orden:
-
+El documento debe tener estas secciones:
 1. ENCABEZADO
-   - Título principal en mayúsculas: MANDAMIENTO DE PAGO
-   - Nombre de la entidad que emite el acto (por ejemplo: INSTITUTO DE DESARROLLO URBANO – IDU)
-   - Lugar y fecha de expedición
-   - Número o radicado del expediente
-
 2. CONSIDERANDO
-   - Explica brevemente la competencia jurídica para el cobro coactivo según los artículos 823 a 829 del Estatuto Tributario Nacional y demás normas aplicables.
-   - Resume los hechos: la existencia del título ejecutivo, su ejecutoria, y el monto adeudado.
-
 3. RESUELVE QUE
-   - Ordena el pago de la obligación al deudor dentro del plazo legal (10 días hábiles).
-   - Indica que en caso de incumplimiento se procederá con embargo y secuestro de bienes.
-   - Menciona que contra este mandamiento no procede recurso, conforme al procedimiento coactivo.
-
 4. FIRMA Y AUTORIZACIÓN
-   - Nombre y cargo del funcionario competente que emite el acto.
-   - Espacio para firma y sello institucional.
 
-Usa un lenguaje jurídico claro y formal, propio de actos administrativos colombianos.
+Cada sección debe comenzar con su respectivo título en mayúsculas.
+Usa saltos de línea claros y evita listas o numeraciones Markdown.
 
-Usa títulos (#), subtítulos (##) y negritas (**texto**) para dar formato como si fuese un documento WORD, pero solo devuelve texto plano con esas reglas.
-Datos para usar en el documento:
 Datos del expediente:
-${JSON.stringify(analisis, null, 2)}
-"""
-"""
+${analisis}
 `;
 
   const iaResponse = await fetch(
