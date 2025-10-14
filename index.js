@@ -105,7 +105,6 @@ app.post("/procesar", async (req, res) => {
       """`;
 
     // 🤖 Llamar a la IA
-    let dataIA, textoIA;
     try {
       console.log("🛰️ Enviando texto a DeepSeek...");
       const iaResponse = await fetch(
@@ -130,8 +129,11 @@ app.post("/procesar", async (req, res) => {
         }
       );
 
-      dataIA = await iaResponse.json();
-      textoIA = dataIA?.choices?.[0]?.message?.content || "{}";
+      const data = await iaResponse.json();
+      if (data?.error)
+        throw new Error(data.error.message || "Error en OpenRouter");
+
+      const textoIA = data?.choices?.[0]?.message?.content.trim() || "{}";
 
       console.log("✅ Respuesta recibida de la IA:");
       console.log(textoIA.slice(0, 500)); // limitar a 500 chars
