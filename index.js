@@ -133,8 +133,13 @@ app.post("/procesar", async (req, res) => {
       if (data?.error)
         throw new Error(data.error.message || "Error en OpenRouter");
 
-      const textoIA = data?.choices?.[0]?.message?.content.trim() || "{}";
-      let limpio = textoIA
+      const textoIA = data?.choices?.[0]?.message?.content?.trim() || "{}";
+
+      // 👇 DECLARAR JSON AQUÍ (clave del arreglo)
+      let json = {};
+
+      // 🧹 Limpiar formato y parsear
+      const limpio = textoIA
         .replace(/```json|```/g, "")
         .replace(/[^\{]*({[\s\S]*})[^\}]*$/, "$1")
         .trim();
@@ -156,9 +161,9 @@ app.post("/procesar", async (req, res) => {
         const { error: updateError } = await supabase
           .from("expedientes")
           .update({
-            titulo: json.tipo_titulo,
-            semaforo: json.semaforo,
-            observaciones: json.observacion,
+            titulo: json.tipo_titulo || "",
+            semaforo: json.semaforo || "ROJO",
+            observaciones: json.observacion || "",
           })
           .eq("id", expediente_id);
 
@@ -168,6 +173,7 @@ app.post("/procesar", async (req, res) => {
         console.error("❌ Error al actualizar Supabase:", err.message);
         throw err;
       }
+
       console.log("✅ Respuesta recibida de la IA:");
       console.log(textoIA.slice(0, 500)); // limitar a 500 chars
       res.json({ ok: true, resultado: json });
