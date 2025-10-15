@@ -178,7 +178,7 @@ async function actualizarExpediente(expediente_id, json) {
 }
 
 // Llamada a la IA para generar el documento legal completo en formato markdown
-async function generarDocumentoIA(texto, textoBase) {
+async function generarDocumentoIA(analisis, textoBase) {
   const datosTexto = formatearAnalisisComoTexto(analisis);
 
   const prompt = `
