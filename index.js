@@ -178,7 +178,9 @@ async function actualizarExpediente(expediente_id, json) {
 }
 
 // Llamada a la IA para generar el documento legal completo en formato markdown
-async function generarDocumentoIA(analisis, textoBase) {
+async function generarDocumentoIA(texto, textoBase) {
+  const datosTexto = formatearAnalisisComoTexto(analisis);
+
   const prompt = `
 Eres un abogado experto en cobro coactivo colombiano.
 Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
@@ -196,7 +198,7 @@ Cada sección debe comenzar con su respectivo título en mayúsculas.
 Usa saltos de línea claros y evita listas o numeraciones Markdown.
 
 Datos del expediente:
-${analisis}
+${datosTexto}
 `;
 
   const iaResponse = await fetch(
@@ -278,6 +280,19 @@ async function subirADirectorioSupabase(buffer, user_id, expediente_id) {
 
   const { data } = supabase.storage.from("mandamientos").getPublicUrl(filePath);
   return data.publicUrl;
+}
+
+function formatearAnalisisComoTexto(analisis) {
+  return `
+Nombre del deudor: ${analisis.nombre || "No disponible"}
+Entidad: ${analisis.entidad || "No disponible"}
+Valor total: ${analisis.valor || "No disponible"}
+Fecha de resolución: ${analisis.fecha_resolucion || "No disponible"}
+Fecha de ejecutoria: ${analisis.fecha_ejecutoria || "No disponible"}
+Tipo de título: ${analisis.tipo_titulo || "No disponible"}
+Semáforo: ${analisis.semaforo || "No disponible"}
+Observación: ${analisis.observacion || "No disponible"}
+  `.trim();
 }
 
 /* ---------------- SERVIDOR ---------------- */
