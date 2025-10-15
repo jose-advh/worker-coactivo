@@ -3,7 +3,14 @@ import mammoth from "mammoth";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import PDFParser from "pdf2json";
-import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  HeadingLevel,
+  TextRun,
+  AlignmentType,
+} from "docx";
 
 const app = express();
 app.use(express.json());
@@ -18,38 +25,38 @@ const supabase = createClient(
 app.post("/procesar", async (req, res) => {
   try {
     const { expediente_id, archivo_path, user_id } = req.body;
-    console.log(`📂 Procesando expediente: ${expediente_id}`);
-    console.log(`📄 Archivo: ${archivo_path}`);
+    console.log(`Procesando expediente: ${expediente_id}`);
+    console.log(`Archivo: ${archivo_path}`);
 
     // Descargar archivo desde Supabase
     const { data, error } = await supabase.storage
       .from("expedientes")
       .download(archivo_path);
     if (error) throw error;
-    console.log("✅ Archivo descargado correctamente desde Supabase");
+    console.log("Archivo descargado correctamente desde Supabase");
 
     // Convertir a Buffer
     const arrayBuffer = await data.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    console.log(`✅ Archivo convertido a Buffer (${buffer.length} bytes)`);
+    console.log(`Archivo convertido a Buffer (${buffer.length} bytes)`);
 
     // Extraer texto
     const textoExtraido = await extraerTexto(buffer, archivo_path);
     console.log(
-      `✅ Texto extraído correctamente (${textoExtraido.length} caracteres)`
+      `Texto extraído correctamente (${textoExtraido.length} caracteres)`
     );
 
     // Primer llamado a la IA: análisis jurídico
     const analisis = await obtenerAnalisisIA(textoExtraido);
-    console.log("✅ Análisis jurídico recibido de la IA:", analisis);
+    console.log("Análisis jurídico recibido de la IA:", analisis);
 
     // Actualizar Supabase con el resultado
     await actualizarExpediente(expediente_id, analisis);
-    console.log(`✅ Expediente ${expediente_id} actualizado en Supabase`);
+    console.log(`Expediente ${expediente_id} actualizado en Supabase`);
 
     // Segundo llamado a la IA: generación del documento legal
     const textoMandamiento = await generarDocumentoIA(analisis, textoExtraido);
-    console.log("✅ Texto del documento generado por la IA");
+    console.log("Texto del documento generado por la IA");
 
     // Generar y subir el archivo DOCX a Supabase
     const docxBuffer = await generarDocxDesdeMarkdown(textoMandamiento);
@@ -59,10 +66,10 @@ app.post("/procesar", async (req, res) => {
       expediente_id
     );
 
-    console.log(`✅ Documento subido correctamente: ${docxUrl}`);
+    console.log(`Documento subido correctamente: ${docxUrl}`);
     res.json({ ok: true, analisis, docxUrl });
   } catch (err) {
-    console.error("💥 Error general en worker:", err);
+    console.error("Error general en worker:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });
@@ -248,52 +255,84 @@ ${datosTexto}
 
 // Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
 async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
-  // Divide el texto por líneas
   const lineas = texto.split("\n");
 
-  // Convierte cada línea en un párrafo con formato según prefijos Markdown
   const contenido = lineas.map((linea) => {
-    if (!linea.trim()) {
-      // Línea vacía = salto de párrafo
+    const textoLimpio = linea.trim();
+    if (!textoLimpio) {
+      // Línea vacía = salto
       return new Paragraph({ text: "" });
     }
 
-    if (linea.startsWith("### ")) {
+    // === TÍTULO PRINCIPAL === (# )
+    if (textoLimpio.startsWith("# ")) {
       return new Paragraph({
-        text: linea.replace("### ", "").trim(),
-        heading: HeadingLevel.HEADING_3,
-        spacing: { after: 200 },
-      });
-    }
-
-    if (linea.startsWith("## ")) {
-      return new Paragraph({
-        text: linea.replace("## ", "").trim(),
-        heading: HeadingLevel.HEADING_2,
-        spacing: { after: 300 },
-      });
-    }
-
-    if (linea.startsWith("# ")) {
-      return new Paragraph({
-        text: linea.replace("# ", "").trim(),
-        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
         spacing: { after: 400 },
+        children: [
+          new TextRun({
+            text: textoLimpio.replace(/^# /, ""),
+            bold: true,
+            size: 32, // 16 pt (docx usa half-points)
+            font: "Times New Roman",
+          }),
+        ],
       });
     }
 
+    // === SUBTÍTULO === (## )
+    if (textoLimpio.startsWith("## ")) {
+      return new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 300 },
+        children: [
+          new TextRun({
+            text: textoLimpio.replace(/^## /, ""),
+            bold: true,
+            size: 28, // 14 pt
+            font: "Times New Roman",
+          }),
+        ],
+      });
+    }
+
+    // === SUBSUBTÍTULO === (### )
+    if (textoLimpio.startsWith("### ")) {
+      return new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 250 },
+        children: [
+          new TextRun({
+            text: textoLimpio.replace(/^### /, ""),
+            bold: true,
+            size: 28,
+            font: "Times New Roman",
+          }),
+        ],
+      });
+    }
+
+    // === PÁRRAFOS NORMALES ===
     // Manejo de negritas **texto**
-    const partes = linea
-      .split(/\*\*(.*?)\*\*/g)
-      .map((t, i) =>
-        i % 2 === 1
-          ? new TextRun({ text: t, bold: true })
-          : new TextRun({ text: t })
-      );
+    const partes = textoLimpio.split(/\*\*(.*?)\*\*/g).map((t, i) =>
+      i % 2 === 1
+        ? new TextRun({
+            text: t,
+            bold: true,
+            font: "Times New Roman",
+            size: 28,
+          })
+        : new TextRun({
+            text: t,
+            font: "Times New Roman",
+            size: 28,
+          })
+    );
 
     return new Paragraph({
       children: partes,
       spacing: { after: 150 },
+      alignment: AlignmentType.JUSTIFIED,
     });
   });
 
