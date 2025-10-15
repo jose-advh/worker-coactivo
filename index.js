@@ -229,19 +229,11 @@ ${datosTexto}
 }
 
 // Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
-// Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
 async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
   // Divide el texto por líneas
   const lineas = texto.split("\n");
 
-  // Crea el documento Word con metadatos obligatorios
-  const doc = new Document({
-    creator: "Sistema Coactivo IA",
-    title: `Mandamiento de Pago - Expediente ${expediente_id}`,
-    description: "Documento legal generado automáticamente por la IA",
-  });
-
-  // Convierte cada línea en un párrafo de Word, aplicando formato según prefijos Markdown
+  // Convierte cada línea en un párrafo con formato según prefijos Markdown
   const contenido = lineas.map((linea) => {
     if (!linea.trim()) {
       // Línea vacía = salto de párrafo
@@ -287,13 +279,20 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
     });
   });
 
-  // Añade la sección principal con todos los párrafos
-  doc.addSection({
-    properties: {},
-    children: contenido,
+  // Crea el documento Word con las secciones correctamente definidas (docx v8+)
+  const doc = new Document({
+    creator: "Sistema Coactivo IA",
+    title: `Mandamiento de Pago - Expediente ${expediente_id}`,
+    description: "Documento legal generado automáticamente por la IA",
+    sections: [
+      {
+        properties: {},
+        children: contenido,
+      },
+    ],
   });
 
-  // Convierte el documento a Buffer (binario listo para subir)
+  // Convierte el documento a Buffer
   const buffer = await Packer.toBuffer(doc);
 
   return buffer;
