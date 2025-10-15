@@ -117,6 +117,7 @@ async function obtenerAnalisisIA(texto) {
   Eres un abogado experto en cobro coactivo colombiano.
   Analiza el siguiente texto y devuelve únicamente un objeto JSON con esta estructura:
 
+
   {
     "nombre": "",
     "entidad": "",
@@ -127,6 +128,11 @@ async function obtenerAnalisisIA(texto) {
     "semaforo": "",
     "observacion": ""
   }
+
+  Por favor, devuelve tal cual con los nombres y dentro de los parentesis el texto.
+  En el valor, busca el VALOR TOTAL de la deuda, analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
+
+  En observacion, devuelve un diagnostico del documento bien detallado, sin importar el color del semaforo. Pero, en tal caso que sea amarrillo, debe ser bien detallado para que el abogado pueda tomar la desición si firmar o no!
 
   Texto:
   """
