@@ -229,38 +229,73 @@ ${datosTexto}
 }
 
 // Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
-async function generarDocxDesdeMarkdown(texto) {
+// Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
+async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
+  // Divide el texto por líneas
   const lineas = texto.split("\n");
-  const doc = new Document();
 
-  const contenido = lineas.map((linea) => {
-    if (linea.startsWith("### ")) {
-      return new Paragraph({
-        text: linea.replace("### ", ""),
-        heading: HeadingLevel.HEADING_3,
-      });
-    } else if (linea.startsWith("## ")) {
-      return new Paragraph({
-        text: linea.replace("## ", ""),
-        heading: HeadingLevel.HEADING_2,
-      });
-    } else if (linea.startsWith("# ")) {
-      return new Paragraph({
-        text: linea.replace("# ", ""),
-        heading: HeadingLevel.HEADING_1,
-      });
-    } else {
-      const partes = linea
-        .split(/\*\*(.*?)\*\*/g)
-        .map((t, i) =>
-          i % 2 === 1 ? new TextRun({ text: t, bold: true }) : new TextRun(t)
-        );
-      return new Paragraph({ children: partes });
-    }
+  // Crea el documento Word con metadatos obligatorios
+  const doc = new Document({
+    creator: "Sistema Coactivo IA",
+    title: `Mandamiento de Pago - Expediente ${expediente_id}`,
+    description: "Documento legal generado automáticamente por la IA",
   });
 
-  doc.addSection({ children: contenido });
+  // Convierte cada línea en un párrafo de Word, aplicando formato según prefijos Markdown
+  const contenido = lineas.map((linea) => {
+    if (!linea.trim()) {
+      // Línea vacía = salto de párrafo
+      return new Paragraph({ text: "" });
+    }
+
+    if (linea.startsWith("### ")) {
+      return new Paragraph({
+        text: linea.replace("### ", "").trim(),
+        heading: HeadingLevel.HEADING_3,
+        spacing: { after: 200 },
+      });
+    }
+
+    if (linea.startsWith("## ")) {
+      return new Paragraph({
+        text: linea.replace("## ", "").trim(),
+        heading: HeadingLevel.HEADING_2,
+        spacing: { after: 300 },
+      });
+    }
+
+    if (linea.startsWith("# ")) {
+      return new Paragraph({
+        text: linea.replace("# ", "").trim(),
+        heading: HeadingLevel.HEADING_1,
+        spacing: { after: 400 },
+      });
+    }
+
+    // Manejo de negritas **texto**
+    const partes = linea
+      .split(/\*\*(.*?)\*\*/g)
+      .map((t, i) =>
+        i % 2 === 1
+          ? new TextRun({ text: t, bold: true })
+          : new TextRun({ text: t })
+      );
+
+    return new Paragraph({
+      children: partes,
+      spacing: { after: 150 },
+    });
+  });
+
+  // Añade la sección principal con todos los párrafos
+  doc.addSection({
+    properties: {},
+    children: contenido,
+  });
+
+  // Convierte el documento a Buffer (binario listo para subir)
   const buffer = await Packer.toBuffer(doc);
+
   return buffer;
 }
 
