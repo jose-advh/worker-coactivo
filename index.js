@@ -197,12 +197,14 @@ async function generarDocumentoIA(analisis, textoBase) {
   const prompt = `
 ADVERTENCIA: SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES
 
+En caso de que el semaforo sea VERDE u AMARILLO:
+
 Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
 Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano.
 Usa lenguaje jurídico formal, propio de actos administrativos, y estructura con títulos (#), subtítulos (##) y negritas (**texto**).
 El documento debe incluir las siguientes secciones en este orden:
 1. ENCABEZADO
-   - Título principal en mayúsculas: MANDAMIENTO DE PAGO
+   - Título principal en mayúsculas Y CENTRADO: MANDAMIENTO DE PAGO
    - Nombre de la entidad que emite el acto (por ejemplo: INSTITUTO DE DESARROLLO URBANO – IDU)
    - Lugar y fecha de expedición
    - Número o radicado del expediente
@@ -227,7 +229,10 @@ Datos del expediente:
 
 Cada sección debe comenzar con su respectivo título en mayúsculas.
 Usa saltos de línea claros y evita listas o numeraciones Markdown.
+no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO!
 
+EN CASO QUE EL SEMAFORO SEA ROJO:
+GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
 Datos del expediente:
 ${datosTexto}
 `;
@@ -342,7 +347,7 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
     });
   });
 
-  // Crea el documento Word con las secciones correctamente definidas (docx v8+)
+  // Crea el documento Word con las secciones correctamente definidas
   const doc = new Document({
     creator: "Sistema Coactivo IA",
     title: `Mandamiento de Pago - Expediente ${expediente_id}`,
