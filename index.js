@@ -230,7 +230,7 @@ Datos del expediente:
 Cada sección debe comenzar con su respectivo título en mayúsculas.
 Usa saltos de línea claros y evita listas o numeraciones Markdown.
 no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO!
-Tambien en resuelve que evita poner cosas como: articulo 1, articulo 2... Solo pon los parrafos.
+Tambien en resuelve que: evita poner cosas como: articulo 1, articulo 2... Solo pon los parrafos sin nada que diga articulo...
 
 EN CASO QUE EL SEMAFORO SEA ROJO:
 GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
