@@ -3,63 +3,54 @@ import mammoth from "mammoth";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import PDFParser from "pdf2json";
-import {
-  Document,
-  Packer,
-  Paragraph,
-  HeadingLevel,
-  TextRun,
-  AlignmentType,
-} from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
 
 const app = express();
 app.use(express.json());
 
-// Conexión con Supabase
+// Inicialización de Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE
 );
 
-// Endpoint principal
+// Endpoint principal: procesa un expediente y genera el mandamiento
 app.post("/procesar", async (req, res) => {
   try {
     const { expediente_id, archivo_path, user_id } = req.body;
+
     console.log(`Procesando expediente: ${expediente_id}`);
     console.log(`Archivo: ${archivo_path}`);
 
-    // Descargar archivo desde Supabase
+    // Descargar el archivo desde Supabase
     const { data, error } = await supabase.storage
       .from("expedientes")
       .download(archivo_path);
     if (error) throw error;
-    console.log("Archivo descargado correctamente desde Supabase");
 
-    // Convertir a Buffer
+    // Convertir el archivo a Buffer
     const arrayBuffer = await data.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    console.log(`Archivo convertido a Buffer (${buffer.length} bytes)`);
 
-    // Extraer texto
+    // Extraer el texto según el tipo de archivo
     const textoExtraido = await extraerTexto(buffer, archivo_path);
-    console.log(
-      `Texto extraído correctamente (${textoExtraido.length} caracteres)`
-    );
 
     // Primer llamado a la IA: análisis jurídico
     const analisis = await obtenerAnalisisIA(textoExtraido);
-    console.log("Análisis jurídico recibido de la IA:", analisis);
 
-    // Actualizar Supabase con el resultado
+    // Actualizar el expediente con el resultado del análisis
     await actualizarExpediente(expediente_id, analisis);
-    console.log(`Expediente ${expediente_id} actualizado en Supabase`);
 
     // Segundo llamado a la IA: generación del documento legal
     const textoMandamiento = await generarDocumentoIA(analisis, textoExtraido);
-    console.log("Texto del documento generado por la IA");
 
-    // Generar y subir el archivo DOCX a Supabase
-    const docxBuffer = await generarDocxDesdeMarkdown(textoMandamiento);
+    // Generar el archivo DOCX y subirlo a Supabase
+    const docxBuffer = await generarDocxDesdeMarkdown(
+      textoMandamiento,
+      expediente_id,
+      user_id
+    );
+
     const docxUrl = await subirADirectorioSupabase(
       docxBuffer,
       user_id,
@@ -74,9 +65,11 @@ app.post("/procesar", async (req, res) => {
   }
 });
 
-/* ---------------- FUNCIONES AUXILIARES ---------------- */
+/* ============================================================
+   FUNCIONES AUXILIARES
+============================================================ */
 
-// Extrae texto según el tipo de archivo
+// Extrae el texto según la extensión del archivo
 async function extraerTexto(buffer, archivo_path) {
   if (archivo_path.toLowerCase().endsWith(".pdf")) {
     return await extraerTextoPDF(buffer);
@@ -88,7 +81,7 @@ async function extraerTexto(buffer, archivo_path) {
   }
 }
 
-// Extraer texto desde PDF usando pdf2json
+// Extrae texto desde archivos PDF usando pdf2json
 async function extraerTextoPDF(buffer) {
   return new Promise((resolve, reject) => {
     const pdfParser = new PDFParser();
@@ -96,6 +89,7 @@ async function extraerTextoPDF(buffer) {
     pdfParser.on("pdfParser_dataError", (errData) =>
       reject(errData.parserError)
     );
+
     pdfParser.on("pdfParser_dataReady", (pdfData) => {
       try {
         const texto = pdfData.Pages.map((page) =>
@@ -111,33 +105,32 @@ async function extraerTextoPDF(buffer) {
   });
 }
 
-// Llamada a la IA para obtener el análisis jurídico estructurado (JSON)
+// Llamado a la IA para obtener un análisis jurídico estructurado (JSON)
 async function obtenerAnalisisIA(texto) {
   const prompt = `
-  Eres un abogado experto en cobro coactivo colombiano.
-  Analiza el siguiente texto y devuelve únicamente un objeto JSON con esta estructura:
+Eres un abogado experto en cobro coactivo colombiano.
+Analiza el siguiente texto y devuelve únicamente un objeto JSON con esta estructura:
 
+{
+  "nombre": "",
+  "entidad": "",
+  "valor": "",
+  "fecha_resolucion": "",
+  "fecha_ejecutoria": "",
+  "tipo_titulo": "",
+  "semaforo": "",
+  "observacion": ""
+}
 
-  {
-    "nombre": "",
-    "entidad": "",
-    "valor": "",
-    "fecha_resolucion": "",
-    "fecha_ejecutoria": "",
-    "tipo_titulo": "",
-    "semaforo": "",
-    "observacion": ""
-  }
+En el campo "semaforo" devuelve:
+VERDE si es un título ejecutivo válido,
+AMARILLO si tiene algún problema,
+ROJO si no es válido o está prescrito.
 
-  Por favor, devuelve tal cual con los nombres y dentro de los parentesis el texto.
-  En el valor, busca el VALOR TOTAL de la deuda, analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
-
-  En observacion, devuelve un diagnostico del documento bien detallado, sin importar el color del semaforo. Pero, en tal caso que sea amarrillo, debe ser bien detallado para que el abogado pueda tomar la desición si firmar o no!
-
-  Texto:
-  """
-  ${texto}
-  """`;
+Texto:
+"""
+${texto}
+"""`;
 
   const iaResponse = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -176,7 +169,7 @@ async function obtenerAnalisisIA(texto) {
   }
 }
 
-// Actualiza Supabase con los datos analizados
+// Actualiza la tabla "expedientes" con los datos analizados
 async function actualizarExpediente(expediente_id, json) {
   const { error } = await supabase
     .from("expedientes")
@@ -190,50 +183,16 @@ async function actualizarExpediente(expediente_id, json) {
   if (error) throw error;
 }
 
-// Llamada a la IA para generar el documento legal completo en formato markdown
+// Llamado a la IA para generar el texto del documento legal
 async function generarDocumentoIA(analisis, textoBase) {
   const datosTexto = formatearAnalisisComoTexto(analisis);
 
   const prompt = `
-ADVERTENCIA: SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES
-
-En caso de que el semaforo sea VERDE u AMARILLO:
-
-Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
+Siguiendo el artículo 826 del Estatuto Tributario:
 Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano.
-Usa lenguaje jurídico formal, propio de actos administrativos, y estructura con títulos (#), subtítulos (##) y negritas (**texto**).
-El documento debe incluir las siguientes secciones en este orden:
-1. ENCABEZADO
-   - Título principal en mayúsculas Y CENTRADO: MANDAMIENTO DE PAGO
-   - Nombre de la entidad que emite el acto (por ejemplo: INSTITUTO DE DESARROLLO URBANO – IDU)
-   - Lugar y fecha de expedición
-   - Número o radicado del expediente
-2. CONSIDERANDO
-   - Explica brevemente la competencia jurídica para el cobro coactivo según los artículos 823 a 829 del Estatuto Tributario Nacional y demás normas aplicables.
-   - Resume los hechos: la existencia del título ejecutivo, su ejecutoria, y el monto adeudado.
-3. RESUELVE QUE
-   - Ordena el pago de la obligación al deudor dentro del plazo legal (10 días hábiles).
-   - Indica que en caso de incumplimiento se procederá con embargo y secuestro de bienes.
-   - Menciona que contra este mandamiento no procede recurso, conforme al procedimiento coactivo.
-4. FIRMA Y AUTORIZACIÓN
-   - Nombre y cargo del funcionario competente que emite el acto.
-   - Espacio para firma y sello institucional.
-Usa un lenguaje jurídico claro y formal, propio de actos administrativos colombianos.
-Cada sección debe comenzar con su respectivo título en mayúsculas.
-Usa saltos de línea claros y evita listas o numeraciones Markdown.
-Usa títulos (#), subtítulos (##) y negritas (**texto**) para dar formato como si fuese un documento WORD, pero solo devuelve texto plano con esas reglas.
-Datos para usar en el documento:
-Datos del expediente:
+Usa títulos en mayúsculas y lenguaje jurídico formal.
+Si el semáforo es ROJO, genera un diagnóstico del título no válido.
 
-4. FIRMA Y AUTORIZACIÓN
-
-Cada sección debe comenzar con su respectivo título en mayúsculas.
-Usa saltos de línea claros y evita listas o numeraciones Markdown.
-no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO!
-Tambien en resuelve que: evita poner cosas como: articulo 1, articulo 2... Solo pon los parrafos sin nada que diga articulo...
-
-EN CASO QUE EL SEMAFORO SEA ROJO:
-GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
 Datos del expediente:
 ${datosTexto}
 `;
@@ -265,18 +224,16 @@ ${datosTexto}
   return data?.choices?.[0]?.message?.content?.trim() || "";
 }
 
-// Convierte texto markdown simple (#, ##, **texto**) a documento Word (.docx)
+// Convierte texto Markdown simple a documento Word (.docx)
 async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
   const lineas = texto.split("\n");
 
   const contenido = lineas.map((linea) => {
     const textoLimpio = linea.trim();
     if (!textoLimpio) {
-      // Línea vacía = salto
       return new Paragraph({ text: "" });
     }
 
-    // === TÍTULO PRINCIPAL === (# )
     if (textoLimpio.startsWith("# ")) {
       return new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -285,14 +242,13 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
           new TextRun({
             text: textoLimpio.replace(/^# /, ""),
             bold: true,
-            size: 32, // 16 pt (docx usa half-points)
+            size: 32,
             font: "Times New Roman",
           }),
         ],
       });
     }
 
-    // === SUBTÍTULO === (## )
     if (textoLimpio.startsWith("## ")) {
       return new Paragraph({
         alignment: AlignmentType.LEFT,
@@ -301,22 +257,6 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
           new TextRun({
             text: textoLimpio.replace(/^## /, ""),
             bold: true,
-            size: 28, // 14 pt
-            font: "Times New Roman",
-          }),
-        ],
-      });
-    }
-
-    // === SUBSUBTÍTULO === (### )
-    if (textoLimpio.startsWith("### ")) {
-      return new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 250 },
-        children: [
-          new TextRun({
-            text: textoLimpio.replace(/^### /, ""),
-            bold: true,
             size: 28,
             font: "Times New Roman",
           }),
@@ -324,22 +264,18 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       });
     }
 
-    // === PÁRRAFOS NORMALES ===
-    // Manejo de negritas **texto**
-    const partes = textoLimpio.split(/\*\*(.*?)\*\*/g).map((t, i) =>
-      i % 2 === 1
-        ? new TextRun({
-            text: t,
-            bold: true,
-            font: "Times New Roman",
-            size: 28,
-          })
-        : new TextRun({
-            text: t,
-            font: "Times New Roman",
-            size: 28,
-          })
-    );
+    const partes = textoLimpio
+      .split(/\*\*(.*?)\*\*/g)
+      .map((t, i) =>
+        i % 2 === 1
+          ? new TextRun({
+              text: t,
+              bold: true,
+              font: "Times New Roman",
+              size: 28,
+            })
+          : new TextRun({ text: t, font: "Times New Roman", size: 28 })
+      );
 
     return new Paragraph({
       children: partes,
@@ -348,26 +284,17 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
     });
   });
 
-  // Crea el documento Word con las secciones correctamente definidas
   const doc = new Document({
     creator: "Sistema Coactivo IA",
     title: `Mandamiento de Pago - Expediente ${expediente_id}`,
-    description: "Documento legal generado automáticamente por la IA",
-    sections: [
-      {
-        properties: {},
-        children: contenido,
-      },
-    ],
+    sections: [{ children: contenido }],
   });
 
-  // Convierte el documento a Buffer
   const buffer = await Packer.toBuffer(doc);
-
   return buffer;
 }
 
-// Sube el documento generado a Supabase Storage
+// Sube el documento al Storage y actualiza el mandamiento_path en el expediente
 async function subirADirectorioSupabase(buffer, user_id, expediente_id) {
   const filePath = `mandamientos/${user_id}/mandamiento_${expediente_id}.docx`;
 
@@ -381,10 +308,24 @@ async function subirADirectorioSupabase(buffer, user_id, expediente_id) {
 
   if (error) throw error;
 
+  // Obtiene la URL pública
   const { data } = supabase.storage.from("mandamientos").getPublicUrl(filePath);
-  return data.publicUrl;
+  const publicUrl = data.publicUrl;
+
+  // Actualiza el campo mandamiento_path en la tabla "expedientes"
+  const { error: updateError } = await supabase
+    .from("expedientes")
+    .update({ mandamiento_path: filePath })
+    .eq("id", expediente_id);
+
+  if (updateError) throw updateError;
+
+  console.log(`mandamiento_path actualizado para expediente ${expediente_id}`);
+
+  return publicUrl;
 }
 
+// Formatea los datos del análisis para incluirlos en el documento
 function formatearAnalisisComoTexto(analisis) {
   return `
 Nombre del deudor: ${analisis.nombre || "No disponible"}
@@ -398,8 +339,10 @@ Observación: ${analisis.observacion || "No disponible"}
   `.trim();
 }
 
-/* ---------------- SERVIDOR ---------------- */
+/* ============================================================
+   INICIO DEL SERVIDOR
+============================================================ */
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`⚙️ Worker corriendo en puerto ${process.env.PORT || 3000}`)
-);
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Worker corriendo en puerto ${process.env.PORT || 3000}`);
+});
