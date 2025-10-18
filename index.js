@@ -122,7 +122,7 @@ async function obtenerAnalisisIA(texto) {
   }
 
   Por favor, devuelve tal cual con los nombres y dentro de los parentesis el texto.
-  En el valor, busca el VALOR TOTAL de la deuda, analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
+  En el valor, busca el VALOR TOTAL de la deuda y ese valor, ponlo en "valor": "".. Es decir, con los intereses debidos. Tambien: analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
 
   En observacion, realiza un reporte detallado para que con eso un abogado sea capaz de tomar la desición si firmar o no el mandamiento, es importante que se detalle muy bien cada uno de los aspectos.
 
