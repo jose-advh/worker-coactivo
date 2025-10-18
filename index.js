@@ -188,7 +188,7 @@ async function generarDocumentoIA(analisis, textoBase) {
 
   const prompt = `
 
-ADVERTENCIA: SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES
+ADVERTENCIA: EL CONTENIDO QUE GENERES SERÁ PEGADO EN UN DOCUMENTO ENTONCES, SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES.
 
 En caso de que el semaforo sea VERDE u AMARILLO:
 Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
@@ -224,10 +224,17 @@ Usa saltos de línea claros y evita listas o numeraciones Markdown.
 no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO
 Tambien: evita enumerar en el documento, los parrafos limpios por favor. dale un estilo formal al documento digno de un abogado de prestigio.
 
+El documendo debe quedar algo como:
+
+(LOS DATOS INICIALES)
+...
+CONSIDERANDO
+parrafos de considerando...
+RESUELVE QUE
+parrafos de resuelve que...
+
 EN CASO QUE EL SEMAFORO SEA ROJO:
 GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
-
-Recuerda, unicamente el contenido del documento solicitado, no generes NADA MAS!
 
 Datos del expediente:
 ${datosTexto}
