@@ -187,57 +187,77 @@ async function generarDocumentoIA(analisis, textoBase) {
   const datosTexto = formatearAnalisisComoTexto(analisis);
 
   const prompt = `
+INSTRUCCIONES ESTRICTAS 
+El texto que generes será pegado directamente en un documento legal.  
+Por lo tanto:
+- NO escribas introducciones, explicaciones ni mensajes al usuario.  
+- NO uses frases como “a continuación”, “se procede a”, “el siguiente texto”, etc.  
+- NO incluyas etiquetas, signos o marcas extrañas (como <comienzo del contenido>, </>, etc).  
+- SOLO devuelve el contenido solicitado, limpio y en formato jurídico profesional.
 
-ADVERTENCIA: EL CONTENIDO QUE GENERES SERÁ PEGADO EN UN DOCUMENTO ENTONCES, SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES.
+---
 
-En caso de que el semaforo sea VERDE u AMARILLO:
-Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
-Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano.
-Usa lenguaje jurídico formal, propio de actos administrativos, y estructura con títulos (#), subtítulos (##) y negritas (**texto**).
+### CASO 1: SEMÁFORO VERDE O AMARILLO
 
-El documento debe incluir las siguientes secciones en este orden:
+Siguiendo el artículo 826 del Estatuto Tributario Colombiano:
 
-1. ENCABEZADO
-   - Título principal en mayúsculas Y CENTRADO: MANDAMIENTO DE PAGO
-   - Nombre de la entidad que emite el acto (por ejemplo: INSTITUTO DE DESARROLLO URBANO – IDU)
-   - Lugar y fecha de expedición
-   - Número o radicado del expediente
-2. CONSIDERANDO
-   - Explica brevemente la competencia jurídica para el cobro coactivo según los artículos 823 a 829 del Estatuto Tributario Nacional y demás normas aplicables.
-   - Resume los hechos: la existencia del título ejecutivo, su ejecutoria, y el monto adeudado.
-3. RESUELVE QUE
-   - Ordena el pago de la obligación al deudor dentro del plazo legal (10 días hábiles).
-   - Indica que en caso de incumplimiento se procederá con embargo y secuestro de bienes.
-   - Menciona que contra este mandamiento no procede recurso, conforme al procedimiento coactivo.
-4. FIRMA Y AUTORIZACIÓN
-   - Nombre y cargo del funcionario competente que emite el acto.
-   - Espacio para firma y sello institucional.
-Usa un lenguaje jurídico claro y formal, propio de actos administrativos colombianos.
-Cada sección debe comenzar con su respectivo título en mayúsculas.
-Usa saltos de línea claros y evita listas o numeraciones Markdown.
-Usa títulos (#), subtítulos (##) y negritas (**texto**) para dar formato como si fuese un documento WORD, pero solo devuelve texto plano con esas reglas.
-Datos para usar en el documento:
-Datos del expediente:
-4. FIRMA Y AUTORIZACIÓN
-Cada sección debe comenzar con su respectivo título en mayúsculas.
-Usa saltos de línea claros y evita listas o numeraciones Markdown.
-no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO
-Tambien: evita enumerar en el documento, los parrafos limpios por favor. dale un estilo formal al documento digno de un abogado de prestigio.
+Genera el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO** en formato legal colombiano.  
+Debe tener tono **formal, jurídico y administrativo**, como un acto emitido por una entidad pública.
 
-El documendo debe quedar algo como:
+#### FORMATO Y ESTILO:
+- Usa **títulos en mayúsculas y centrados** (ejemplo: “MANDAMIENTO DE PAGO”).  
+- Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.  
+- Usa **negritas** para destacar nombres, cargos o partes importantes.  
+- NO uses listas Markdown ni enumeraciones de artículos (“ARTÍCULO PRIMERO”, etc.).  
+- Escribe los párrafos directamente, en lenguaje jurídico fluido.  
+- Evita frases repetitivas o genéricas.  
+- Mantén un tono solemne, claro y conciso, como lo haría un abogado experto en cobro coactivo.
 
-(LOS DATOS INICIALES)
-...
-CONSIDERANDO
-parrafos de considerando...
-RESUELVE QUE
-parrafos de resuelve que...
+#### ESTRUCTURA EXACTA:
+# MANDAMIENTO DE PAGO
+**[Nombre de la entidad pública]**  
+**[Lugar y fecha]**  
+**[Número o radicado del expediente]**
 
-EN CASO QUE EL SEMAFORO SEA ROJO:
-GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
+## CONSIDERANDO
+Expón brevemente:
+- La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
+- La existencia del título ejecutivo y su ejecutoria.  
+- El monto adeudado y fundamento del cobro.
 
-Datos del expediente:
+## RESUELVE QUE
+Redacta párrafos que:
+- Ordenen el pago de la obligación dentro del plazo legal (10 días hábiles).  
+- Adviertan sobre el embargo y secuestro de bienes en caso de incumplimiento.  
+- Indiquen que no procede recurso contra este acto.  
+
+No uses “ARTÍCULO PRIMERO”, “SEGUNDO” ni numeraciones. Solo redacta los párrafos.
+
+## FIRMA Y AUTORIZACIÓN
+**[Nombre del funcionario competente]**  
+**[Cargo]**  
+Espacio para firma y sello institucional.
+
+---
+
+### CASO 2: SEMÁFORO ROJO
+
+Genera el **texto completo de un DIAGNÓSTICO JURÍDICO** que explique las razones por las cuales el título ejecutivo **no es válido o no procede el cobro coactivo**.  
+Debe estar escrito para que **un abogado pueda entender los fundamentos legales del rechazo o invalidez**, con tono formal, claro y técnico.
+
+---
+
+### DATOS DEL EXPEDIENTE
+Usa la siguiente información en el texto, si aplica:
 ${datosTexto}
+
+---
+
+REGLAS FINALES:
+- Solo genera el texto del documento.  
+- No escribas nada fuera del cuerpo del acto.  
+- No añadas marcas, comentarios o delimitadores.  
+- Mantén una estructura limpia, con párrafos naturales, sin enumeraciones ni introducciones.
 `;
 
   const iaResponse = await fetch(
