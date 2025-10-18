@@ -108,24 +108,23 @@ async function extraerTextoPDF(buffer) {
 // Llamado a la IA para obtener un análisis jurídico estructurado (JSON)
 async function obtenerAnalisisIA(texto) {
   const prompt = `
-Eres un abogado experto en cobro coactivo colombiano.
-Analiza el siguiente texto y devuelve únicamente un objeto JSON con esta estructura:
+  Eres un abogado experto en cobro coactivo colombiano.
+  Analiza el siguiente texto y devuelve únicamente un objeto JSON con esta estructura:
+  {
+    "nombre": "",
+    "entidad": "",
+    "valor": "",
+    "fecha_resolucion": "",
+    "fecha_ejecutoria": "",
+    "tipo_titulo": "",
+    "semaforo": "",
+    "observacion": ""
+  }
 
-{
-  "nombre": "",
-  "entidad": "",
-  "valor": "",
-  "fecha_resolucion": "",
-  "fecha_ejecutoria": "",
-  "tipo_titulo": "",
-  "semaforo": "",
-  "observacion": ""
-}
+  Por favor, devuelve tal cual con los nombres y dentro de los parentesis el texto.
+  En el valor, busca el VALOR TOTAL de la deuda, analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
 
-En el campo "semaforo" devuelve:
-VERDE si es un título ejecutivo válido,
-AMARILLO si tiene algún problema,
-ROJO si no es válido o está prescrito.
+  En observacion, realiza un reporte detallado para que con eso un abogado sea capaz de tomar la desición si firmar o no el mandamiento, es importante que se detalle muy bien cada uno de los aspectos.
 
 Texto:
 """
@@ -188,10 +187,45 @@ async function generarDocumentoIA(analisis, textoBase) {
   const datosTexto = formatearAnalisisComoTexto(analisis);
 
   const prompt = `
-Siguiendo el artículo 826 del Estatuto Tributario:
+
+ADVERTENCIA: SOLO GENERA LO PEDIDO, NO AÑADAS TEXTO DE INTRODUCCION TUYO NI QUE VAS A REALIZAR LA TAREA, CUMPLE LO PEDIDO Y DEVUELVE EL TEXTO LIMPIO SIGUIENDO LAS INSTRUCCIONES
+
+En caso de que el semaforo sea VERDE u AMARILLO:
+Siguiendo lo que dice el artículo 826 del Estatuto Tributario:
 Genera el texto completo y estructurado de un MANDAMIENTO DE PAGO en formato legal colombiano.
-Usa títulos en mayúsculas y lenguaje jurídico formal.
-Si el semáforo es ROJO, genera un diagnóstico del título no válido.
+Usa lenguaje jurídico formal, propio de actos administrativos, y estructura con títulos (#), subtítulos (##) y negritas (**texto**).
+
+El documento debe incluir las siguientes secciones en este orden:
+
+1. ENCABEZADO
+   - Título principal en mayúsculas Y CENTRADO: MANDAMIENTO DE PAGO
+   - Nombre de la entidad que emite el acto (por ejemplo: INSTITUTO DE DESARROLLO URBANO – IDU)
+   - Lugar y fecha de expedición
+   - Número o radicado del expediente
+2. CONSIDERANDO
+   - Explica brevemente la competencia jurídica para el cobro coactivo según los artículos 823 a 829 del Estatuto Tributario Nacional y demás normas aplicables.
+   - Resume los hechos: la existencia del título ejecutivo, su ejecutoria, y el monto adeudado.
+3. RESUELVE QUE
+   - Ordena el pago de la obligación al deudor dentro del plazo legal (10 días hábiles).
+   - Indica que en caso de incumplimiento se procederá con embargo y secuestro de bienes.
+   - Menciona que contra este mandamiento no procede recurso, conforme al procedimiento coactivo.
+4. FIRMA Y AUTORIZACIÓN
+   - Nombre y cargo del funcionario competente que emite el acto.
+   - Espacio para firma y sello institucional.
+Usa un lenguaje jurídico claro y formal, propio de actos administrativos colombianos.
+Cada sección debe comenzar con su respectivo título en mayúsculas.
+Usa saltos de línea claros y evita listas o numeraciones Markdown.
+Usa títulos (#), subtítulos (##) y negritas (**texto**) para dar formato como si fuese un documento WORD, pero solo devuelve texto plano con esas reglas.
+Datos para usar en el documento:
+Datos del expediente:
+4. FIRMA Y AUTORIZACIÓN
+Cada sección debe comenzar con su respectivo título en mayúsculas.
+Usa saltos de línea claros y evita listas o numeraciones Markdown.
+no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO!
+Tambien en resuelve que: evita poner cosas como: articulo 1, articulo 2... Solo pon los parrafos sin nada que diga articulo...
+
+EN CASO QUE EL SEMAFORO SEA ROJO:
+GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
 
 Datos del expediente:
 ${datosTexto}
@@ -264,18 +298,16 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       });
     }
 
-    const partes = textoLimpio
-      .split(/\*\*(.*?)\*\*/g)
-      .map((t, i) =>
-        i % 2 === 1
-          ? new TextRun({
-              text: t,
-              bold: true,
-              font: "Times New Roman",
-              size: 28,
-            })
-          : new TextRun({ text: t, font: "Times New Roman", size: 28 })
-      );
+    const partes = textoLimpio.split(/\*\*(.*?)\*\*/g).map((t, i) =>
+      i % 2 === 1
+        ? new TextRun({
+            text: t,
+            bold: true,
+            font: "Times New Roman",
+            size: 28,
+          })
+        : new TextRun({ text: t, font: "Times New Roman", size: 28 })
+    );
 
     return new Paragraph({
       children: partes,
