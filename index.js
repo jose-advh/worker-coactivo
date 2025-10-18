@@ -221,11 +221,13 @@ Datos del expediente:
 4. FIRMA Y AUTORIZACIÓN
 Cada sección debe comenzar con su respectivo título en mayúsculas.
 Usa saltos de línea claros y evita listas o numeraciones Markdown.
-no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO!
-Tambien en resuelve que: evita poner cosas como: articulo 1, articulo 2... Solo pon los parrafos sin nada que diga articulo...
+no pongas 1., 2... solo pon por ejemplo: CONSIDERANDO
+Tambien: evita enumerar en el documento, los parrafos limpios por favor. dale un estilo formal al documento digno de un abogado de prestigio.
 
 EN CASO QUE EL SEMAFORO SEA ROJO:
 GENERA EL TEXTO COMPLETO DE UN DIAGNOSTICO DE UN TITULO EJECUTIVO NO VALIDO POR CIERTOS MOTIVOS QUE DEBERÁS ANALIZAR Y DAR A ENTENDER A UN ABOGADO.
+
+Recuerda, unicamente el contenido del documento solicitado, no generes NADA MAS!
 
 Datos del expediente:
 ${datosTexto}
