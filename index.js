@@ -186,32 +186,29 @@ async function actualizarExpediente(expediente_id, json) {
 async function generarDocumentoIA(analisis, textoBase) {
   const datosTexto = formatearAnalisisComoTexto(analisis);
 
-  const prompt = `
-INSTRUCCIONES ESTRICTAS 
-El texto que generes será pegado directamente en un documento legal.  
-Por lo tanto:
-- NO escribas introducciones, explicaciones ni mensajes al usuario.  
-- NO uses frases como “a continuación”, “se procede a”, “el siguiente texto”, etc.  
-- NO incluyas etiquetas, signos o marcas extrañas (como <comienzo del contenido>, </>, etc).  
-- SOLO devuelve el contenido solicitado, limpio y en formato jurídico profesional.
+  // Detectar el tipo de semáforo
+  const semaforo = (analisis.semaforo || "").toUpperCase();
 
----
+  // Prompt base
+  let prompt = "";
+  let modelo = "deepseek/deepseek-chat-v3.1:free";
 
-### CASO 1: SEMÁFORO VERDE O AMARILLO
+  if (semaforo === "VERDE" || semaforo === "AMARILLO") {
+    // === Caso Mandamiento de Pago ===
+    prompt = `
+Eres un abogado experto en cobro coactivo colombiano.
 
-Siguiendo el artículo 826 del Estatuto Tributario Colombiano:
+Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO** en formato legal colombiano.
 
-Genera el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO** en formato legal colombiano.  
 Debe tener tono **formal, jurídico y administrativo**, como un acto emitido por una entidad pública.
 
 #### FORMATO Y ESTILO:
-- Usa **títulos en mayúsculas y centrados** (ejemplo: “MANDAMIENTO DE PAGO”).  
-- Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.  
-- Usa **negritas** para destacar nombres, cargos o partes importantes.  
-- NO uses listas Markdown ni enumeraciones de artículos (“ARTÍCULO PRIMERO”, etc.).  
-- Escribe los párrafos directamente, en lenguaje jurídico fluido.  
-- Evita frases repetitivas o genéricas.  
-- Mantén un tono solemne, claro y conciso, como lo haría un abogado experto en cobro coactivo.
+- Usa **títulos en mayúsculas y centrados** (ejemplo: “MANDAMIENTO DE PAGO”).
+- Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.
+- Usa **negritas** para destacar nombres, cargos o partes importantes.
+- Escribe los párrafos directamente, en lenguaje jurídico fluido.
+- Evita frases genéricas o redundantes.
+- Mantén tono solemne, claro y conciso.
 
 #### ESTRUCTURA EXACTA:
 # MANDAMIENTO DE PAGO
@@ -231,35 +228,48 @@ Redacta párrafos que:
 - Adviertan sobre el embargo y secuestro de bienes en caso de incumplimiento.  
 - Indiquen que no procede recurso contra este acto.  
 
-No uses “ARTÍCULO PRIMERO”, “SEGUNDO” ni numeraciones. Solo redacta los párrafos.
-
 ## FIRMA Y AUTORIZACIÓN
 **[Nombre del funcionario competente]**  
 **[Cargo]**  
 Espacio para firma y sello institucional.
 
----
-
-### CASO 2: SEMÁFORO ROJO
-
-Genera el **texto completo de un DIAGNÓSTICO JURÍDICO** que explique las razones por las cuales el título ejecutivo **no es válido o no procede el cobro coactivo**.  
-Debe estar escrito para que **un abogado pueda entender los fundamentos legales del rechazo o invalidez**, con tono formal, claro y técnico.
-
----
-
-### DATOS DEL EXPEDIENTE
-Usa la siguiente información en el texto, si aplica:
+#### DATOS DEL EXPEDIENTE
 ${datosTexto}
 
----
+Solo devuelve el texto del documento, limpio, sin comentarios ni explicaciones.`;
+  } else if (semaforo === "ROJO") {
+    // === Caso Diagnóstico Jurídico ===
+    prompt = `
+Eres un abogado experto en cobro coactivo colombiano.
 
-REGLAS FINALES:
-- Solo genera el texto del documento.  
-- No escribas nada fuera del cuerpo del acto.  
-- No añadas marcas, comentarios o delimitadores.  
-- Mantén una estructura limpia, con párrafos naturales, sin enumeraciones ni introducciones.
-`;
+Genera el **texto completo de un DIAGNÓSTICO JURÍDICO** sobre un expediente cuyo título ejecutivo **no es válido o no procede para cobro coactivo**.
 
+Debe estar redactado con tono **jurídico formal, técnico y analítico**, orientado a que un abogado pueda entender **por qué el título fue marcado con semáforo ROJO**.
+
+#### ESTRUCTURA Y CONTENIDO:
+# DIAGNÓSTICO JURÍDICO
+**[Entidad analizada]**  
+**[Fecha del informe]**  
+**[Número o radicado del expediente]**
+
+## ANÁLISIS JURÍDICO
+Explica de forma razonada:
+- Las razones por las cuales el título **no constituye título ejecutivo válido** (por ejemplo, falta de ejecutoria, prescripción, error en la resolución, falta de claridad en la obligación, vicios de forma o fondo).
+- Si el documento presenta **omisiones, inconsistencias o errores** que impidan iniciar cobro coactivo.
+- Fundamenta con base en normas del **Estatuto Tributario Colombiano** y la **jurisprudencia aplicable**.
+
+## CONCLUSIÓN
+Redacta un párrafo que resuma **por qué el expediente no puede avanzar al mandamiento de pago** y qué **acciones correctivas o revisiones** se recomiendan (por ejemplo: verificar prescripción, corregir valores, obtener nueva resolución, etc.).
+
+#### DATOS DEL EXPEDIENTE
+${datosTexto}
+
+Solo devuelve el texto limpio, sin explicaciones adicionales, sin listas ni enumeraciones.`;
+  } else {
+    throw new Error(`Semáforo no válido o no reconocido: ${semaforo}`);
+  }
+
+  // Llamado a OpenRouter con el prompt elegido
   const iaResponse = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
     {
@@ -269,7 +279,7 @@ REGLAS FINALES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-chat-v3.1:free",
+        model: modelo,
         messages: [
           {
             role: "system",
