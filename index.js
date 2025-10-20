@@ -323,10 +323,11 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       return new Paragraph({ text: "" });
     }
 
+    // Título principal (#)
     if (textoLimpio.startsWith("# ")) {
       return new Paragraph({
         alignment: AlignmentType.CENTER,
-        spacing: { after: 400 },
+        spacing: { after: 400, line: 360 }, // interlineado 1.5
         children: [
           new TextRun({
             text: textoLimpio.replace(/^# /, ""),
@@ -338,10 +339,11 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       });
     }
 
+    // Subtítulo (##)
     if (textoLimpio.startsWith("## ")) {
       return new Paragraph({
         alignment: AlignmentType.LEFT,
-        spacing: { after: 300 },
+        spacing: { after: 300, line: 360 }, // interlineado 1.5
         children: [
           new TextRun({
             text: textoLimpio.replace(/^## /, ""),
@@ -353,6 +355,7 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       });
     }
 
+    // Párrafos normales con soporte para **negritas**
     const partes = textoLimpio.split(/\*\*(.*?)\*\*/g).map((t, i) =>
       i % 2 === 1
         ? new TextRun({
@@ -366,15 +369,24 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
 
     return new Paragraph({
       children: partes,
-      spacing: { after: 150 },
       alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 150, line: 360 }, // interlineado 1.5
     });
   });
 
   const doc = new Document({
     creator: "Sistema Coactivo IA",
     title: `Mandamiento de Pago - Expediente ${expediente_id}`,
-    sections: [{ children: contenido }],
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }, // 2.5 cm de márgenes
+          },
+        },
+        children: contenido,
+      },
+    ],
   });
 
   const buffer = await Packer.toBuffer(doc);
