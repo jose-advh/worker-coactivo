@@ -191,47 +191,75 @@ async function generarDocumentoIA(analisis, textoBase) {
 
   // Prompt base
   let prompt = "";
-  let modelo = "deepseek/deepseek-chat-v3.1:free";
+  let modelo = "openai/gpt-oss-20b:free";
 
   if (semaforo === "VERDE" || semaforo === "AMARILLO") {
     // === Caso Mandamiento de Pago ===
     prompt = `
 Eres un abogado experto en cobro coactivo colombiano.
 
-Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO** en formato legal colombiano.
+Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO No. ___** en formato legal colombiano.
 
 Debe tener tono **formal, jurídico y administrativo**, como un acto emitido por una entidad pública.
 
+---
+
 #### FORMATO Y ESTILO:
-- Usa **títulos en mayúsculas y centrados** (ejemplo: “MANDAMIENTO DE PAGO”).
+- El **título principal** debe ir **centrado, en mayúsculas y negrita**: “MANDAMIENTO DE PAGO No. ___”.
 - Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.
-- Usa **negritas** para destacar nombres, cargos o partes importantes.
-- Escribe los párrafos directamente, en lenguaje jurídico fluido.
+- Utiliza **negritas** para nombres, cargos, entidades y referencias legales importantes.
+- Emplea un **interlineado de 1.5**, con **márgenes uniformes de 2.5 cm**.
+- Usa lenguaje **jurídico claro, preciso y solemne**.
 - Evita frases genéricas o redundantes.
-- Mantén tono solemne, claro y conciso.
+- El resultado debe parecer un **acto administrativo oficial listo para imprimirse en Word**.
+
+---
 
 #### ESTRUCTURA EXACTA:
-# MANDAMIENTO DE PAGO
+
+# MANDAMIENTO DE PAGO No. ___
 **[Nombre de la entidad pública]**  
 **[Lugar y fecha]**  
 **[Número o radicado del expediente]**
 
+---
+
+## ANTECEDENTES
+Redacta un párrafo introductorio con esta fórmula:
+“Que mediante **Certificado de Estado de Cuenta N°____**, expedido por la **Subdirección Financiera del IDU**, se determinó la obligación a cargo de **[nombre del deudor]**.”
+
+---
+
 ## CONSIDERANDO
 Expón brevemente:
 - La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
-- La existencia del título ejecutivo y su ejecutoria.  
-- El monto adeudado y fundamento del cobro.
+- La **existencia y ejecutoria del título ejecutivo**, especificando:
+  - **Tipo de obligación** (por ejemplo: contribución de valorización, impuesto, tasa o sanción).  
+  - **Número y fecha de la resolución** que impuso la obligación.  
+  - **Fecha de ejecutoria** del acto administrativo.  
+- El monto adeudado y su fundamento normativo.
+
+---
 
 ## RESUELVE QUE
 Redacta párrafos que:
-- Ordenen el pago de la obligación dentro del plazo legal (10 días hábiles).  
-- Adviertan sobre el embargo y secuestro de bienes en caso de incumplimiento.  
-- Indiquen que no procede recurso contra este acto.  
+- Ordenen al deudor el **pago de la obligación dentro del plazo legal de diez (10) días hábiles** contados a partir de la notificación del presente acto.  
+- Adviertan que, de no efectuarse el pago, se **procederá al embargo y secuestro de bienes** conforme a la ley.  
+- Indiquen expresamente que **contra este acto no procede recurso alguno**.
+
+---
 
 ## FIRMA Y AUTORIZACIÓN
 **[Nombre del funcionario competente]**  
 **[Cargo]**  
-Espacio para firma y sello institucional.
+(Espacio para firma y sello institucional)
+
+---
+
+## NOTIFICACIÓN
+“Notifíquese personalmente al deudor conforme al **artículo 68 del CPACA** y **artículo 826 del Estatuto Tributario**.”
+
+---
 
 #### DATOS DEL EXPEDIENTE
 ${datosTexto}
