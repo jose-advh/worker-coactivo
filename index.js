@@ -198,22 +198,17 @@ async function generarDocumentoIA(analisis, textoBase) {
     prompt = `
 Eres un abogado experto en cobro coactivo colombiano.
 
-Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **texto completo y estructurado** de un **MANDAMIENTO DE PAGO No. ___** en formato legal colombiano.
+Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **texto completo y estructurado** de un MANDAMIENTO DE PAGO No. ___ en formato legal colombiano.
 
-Debe tener tono **formal, jurídico y administrativo**, como un acto emitido por una entidad pública.
-
----
+Debe tener tono formal, jurídico y administrativo, como un acto emitido por una entidad pública.
 
 #### FORMATO Y ESTILO:
 - El **título principal** debe ir **centrado, en mayúsculas y negrita**: “MANDAMIENTO DE PAGO No. ___”.
 - Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.
 - Utiliza **negritas** para nombres, cargos, entidades y referencias legales importantes.
-- Emplea un **interlineado de 1.5**, con **márgenes uniformes de 2.5 cm**.
-- Usa lenguaje **jurídico claro, preciso y solemne**.
+- Usa lenguaje jurídico claro, preciso y solemne.
 - Evita frases genéricas o redundantes.
 - El resultado debe parecer un **acto administrativo oficial listo para imprimirse en Word**.
-
----
 
 #### ESTRUCTURA EXACTA:
 
@@ -222,24 +217,18 @@ Debe tener tono **formal, jurídico y administrativo**, como un acto emitido por
 **[Lugar y fecha]**  
 **[Número o radicado del expediente]**
 
----
-
 ## ANTECEDENTES
 Redacta un párrafo introductorio con esta fórmula:
-“Que mediante **Certificado de Estado de Cuenta N°____**, expedido por la **Subdirección Financiera del IDU**, se determinó la obligación a cargo de **[nombre del deudor]**.”
-
----
+“Que mediante **Certificado de Estado de Cuenta N°____, expedido por la Subdirección Financiera del ..., se determinó la obligación a cargo de [nombre del deudor].”
 
 ## CONSIDERANDO
 Expón brevemente:
-- La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
-- La **existencia y ejecutoria del título ejecutivo**, especificando:
-  - **Tipo de obligación** (por ejemplo: contribución de valorización, impuesto, tasa o sanción).  
-  - **Número y fecha de la resolución** que impuso la obligación.  
-  - **Fecha de ejecutoria** del acto administrativo.  
-- El monto adeudado y su fundamento normativo.
-
----
+La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
+La existencia y ejecutoria del título ejecutivo, especificando:
+  Tipo de obligación (por ejemplo: contribución de valorización, impuesto, tasa o sanción).  
+  Número y fecha de la resolución** que impuso la obligación.  
+  Fecha de ejecutoria del acto administrativo.  
+  El monto adeudado y su fundamento normativo.
 
 ## RESUELVE QUE
 Redacta párrafos que:
@@ -257,9 +246,8 @@ Redacta párrafos que:
 ---
 
 ## NOTIFICACIÓN
-“Notifíquese personalmente al deudor conforme al **artículo 68 del CPACA** y **artículo 826 del Estatuto Tributario**.”
+“debes poner algo por ejemplo: Notifíquese personalmente al deudor conforme al **artículo 68 del CPACA** y **artículo 826 del Estatuto Tributario**.”
 
----
 
 #### DATOS DEL EXPEDIENTE
 ${datosTexto}
