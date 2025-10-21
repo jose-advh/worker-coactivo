@@ -251,8 +251,6 @@ Redacta párrafos que:
 
 Al final del documento debes poner:
 Dado en [ciudad]., a los dias [dias] del mes de [mes] de [año]
-
---- (espacio para firma)
 Dr. [Nombre del Abogado ejecutor] --- Si no encuentras nombre del abogado en los datos del expediente, deja tal cual [nombre del abogado ejecutor]
 Tarjeta Profesional No. [numero] --- Si no encuentras el numero de tarjeta en los datos del expediente, deja tal cual [numero]
 Entidad: [nombre de la entidad]
