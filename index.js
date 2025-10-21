@@ -124,7 +124,7 @@ async function obtenerAnalisisIA(texto) {
   Por favor, devuelve tal cual con los nombres y dentro de los parentesis el texto.
   En el valor, busca el VALOR TOTAL de la deuda y ese valor, ponlo en "valor": "".. Es decir, con los intereses debidos. Tambien: analiza bien el texto... y en el semaforo devuelve: VERDE si es un titulo ejecutivo valido, AMARILLO si es un titulo ejecutivo con algun problema y ROJO si es un titulo ejecutivo NO VALIDO o PREESCRITO
 
-  En observacion, realiza un reporte detallado para que con eso un abogado sea capaz de tomar la desición si firmar o no el mandamiento, es importante que se detalle muy bien cada uno de los aspectos.
+  En observacion, realiza un reporte detallado para que con eso un abogado sea capaz de tomar la desición si firmar o no el mandamiento, es importante que se detalle muy bien cada uno de los aspectos y agrega la ciudad del documento.
 
 Texto:
 """
@@ -203,9 +203,9 @@ Siguiendo el artículo 826 del Estatuto Tributario Colombiano, redacta el **text
 Debe tener tono formal, jurídico y administrativo, como un acto emitido por una entidad pública.
 
 #### FORMATO Y ESTILO:
-- El **título principal** debe ir **centrado, en mayúsculas y negrita**: “MANDAMIENTO DE PAGO No. ___”.
+- El título principal debe ir centrado, en mayúsculas y negrita: “MANDAMIENTO DE PAGO No. MP-FechaHoy”. --- Debes cambiar fecha hoy por la fecha del dia de hoy
 - Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.
-- Utiliza **negritas** para nombres, cargos, entidades y referencias legales importantes.
+- Utiliza negritas para nombres, cargos, entidades y referencias legales importantes.
 - Usa lenguaje jurídico claro, preciso y solemne.
 - Evita frases genéricas o redundantes.
 - El resultado debe parecer un **acto administrativo oficial listo para imprimirse en Word**.
@@ -225,6 +225,7 @@ Redacta un párrafo introductorio con esta fórmula:
 Expón brevemente:
 La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
 La existencia y ejecutoria del título ejecutivo, especificando:
+  (Pesos Colombianos)
   Tipo de obligación (por ejemplo: contribución de valorización, impuesto, tasa o sanción).  
   Número y fecha de la resolución** que impuso la obligación.  
   Fecha de ejecutoria del acto administrativo.  
@@ -232,9 +233,9 @@ La existencia y ejecutoria del título ejecutivo, especificando:
 
 ## RESUELVE QUE
 Redacta párrafos que:
-- Ordenen al deudor el **pago de la obligación dentro del plazo legal de diez (10) días hábiles** contados a partir de la notificación del presente acto.  
-- Adviertan que, de no efectuarse el pago, se **procederá al embargo y secuestro de bienes** conforme a la ley.  
-- Indiquen expresamente que **contra este acto no procede recurso alguno**.
+- Ordenen al deudor el pago de la obligación dentro del plazo legal de diez (10) días hábiles contados a partir de la notificación del presente acto.  
+- Adviertan que, de no efectuarse el pago, se procederá al embargo y secuestro de bienes conforme a la ley.  
+- Indiquen expresamente que contra este acto no procede recurso alguno.
 
 ---
 
@@ -247,6 +248,14 @@ Redacta párrafos que:
 
 ## NOTIFICACIÓN
 “debes poner algo por ejemplo: Notifíquese personalmente al deudor conforme al **artículo 68 del CPACA** y **artículo 826 del Estatuto Tributario**.”
+
+Al final del documento debes poner:
+Dado en [ciudad]., a los dias [dias] del mes de [mes] de [año]
+
+--- (espacio para firma)
+Dr. [Nombre del Abogado ejecutor] --- Si no encuentras nombre del abogado en los datos del expediente, deja tal cual [nombre del abogado ejecutor]
+Tarjeta Profesional No. [numero] --- Si no encuentras el numero de tarjeta en los datos del expediente, deja tal cual [numero]
+Entidad: [nombre de la entidad]
 
 
 #### DATOS DEL EXPEDIENTE
