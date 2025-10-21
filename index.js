@@ -131,29 +131,30 @@ Texto:
 ${texto}
 """`;
 
-  const iaResponse = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
-        messages: [
-          {
-            role: "system",
-            content: "Eres un abogado experto en cobro coactivo colombiano.",
-          },
-          { role: "user", content: prompt },
-        ],
-      }),
-    }
-  );
+  const iaResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, // Mantiene la misma variable
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-5", // Cambiado a modelo oficial de OpenAI
+      messages: [
+        {
+          role: "system",
+          content: "Eres un abogado experto en cobro coactivo colombiano.",
+        },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
 
   const data = await iaResponse.json();
-  if (data?.error) throw new Error(data.error.message || "Error en OpenRouter");
+
+  if (!iaResponse.ok) {
+    console.error("Error de OpenAI:", data);
+    throw new Error(data.error?.message || "Error en la API de OpenAI");
+  }
 
   const textoIA = data?.choices?.[0]?.message?.content?.trim() || "{}";
   const limpio = textoIA
@@ -191,7 +192,7 @@ async function generarDocumentoIA(analisis, textoBase) {
 
   // Prompt base
   let prompt = "";
-  let modelo = "openai/gpt-oss-20b:free";
+  let modelo = "gpt-5";
 
   if (semaforo === "VERDE" || semaforo === "AMARILLO") {
     // === Caso Mandamiento de Pago ===
@@ -293,29 +294,30 @@ Solo devuelve el texto limpio, sin explicaciones adicionales, sin listas ni enum
   }
 
   // Llamado a OpenRouter con el prompt elegido
-  const iaResponse = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: modelo,
-        messages: [
-          {
-            role: "system",
-            content: "Eres un abogado profesional en procesos coactivos.",
-          },
-          { role: "user", content: prompt },
-        ],
-      }),
-    }
-  );
+  const iaResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: modelo,
+      messages: [
+        {
+          role: "system",
+          content: "Eres un abogado profesional en procesos coactivos.",
+        },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
 
+  // Manejo de respuesta
   const data = await iaResponse.json();
-  if (data?.error) throw new Error(data.error.message || "Error en OpenRouter");
+
+  if (data?.error) {
+    throw new Error(data.error.message || "Error en OpenAI");
+  }
 
   return data?.choices?.[0]?.message?.content?.trim() || "";
 }
