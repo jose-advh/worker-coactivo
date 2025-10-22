@@ -252,7 +252,7 @@ Mencionar los datos del deudor o sociedad, el número de certificado, el valor d
 
 Concluir con la expresión: “En mérito de lo expuesto la abogada ejecutora,”.
 
-## RESUELVE QUE
+# RESUELVE QUE
 Redacta detalladamente la parte resolutiva de un Mandamiento de Pago dentro de un proceso administrativo de cobro coactivo, siguiendo el formato jurídico oficial colombiano.
 Estructura el texto en numerales (PRIMERO, SEGUNDO, TERCERO...) donde se ordene:
 La expedición del mandamiento de pago (art. 826 E.T.N.), indicando el valor de la deuda, intereses, CHIP, matrícula inmobiliaria, dirección y nombre del deudor.
@@ -266,14 +266,16 @@ Usa lenguaje formal, jurídico-administrativo, claro y conciso, coherente con lo
 
 ---
 
-## FIRMA Y AUTORIZACIÓN
+# FIRMA Y AUTORIZACIÓN
+(espacio)
 **[Nombre del funcionario competente]**  
 **[Cargo]**  
 (Espacio para firma y sello institucional)
 
 ---
 
-## NOTIFICACIÓN
+# NOTIFICACIÓN
+(espacio)
 “debes poner algo por ejemplo: Notifíquese personalmente al deudor conforme al **artículo 68 del CPACA** y **artículo 826 del Estatuto Tributario**.”
 
 Al final del documento debes poner:
