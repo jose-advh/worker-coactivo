@@ -208,7 +208,7 @@ Debe tener tono formal, jurídico y administrativo, como un acto emitido por una
 
 #### FORMATO Y ESTILO:
 - El título principal debe ir centrado, en mayúsculas y negrita: “MANDAMIENTO DE PAGO No. MP-FechaHoy”. --- Debes cambiar fecha hoy por la fecha del dia de hoy
-- Usa subtítulos con # y ## para estructurar, pero **sin numeraciones (1., 2., etc.)**.
+- Usa subtítulos con # y ## 
 - Utiliza negritas para nombres, cargos, entidades y referencias legales importantes.
 - Usa lenguaje jurídico claro, preciso y solemne.
 - Evita frases genéricas o redundantes.
@@ -221,25 +221,33 @@ Debe tener tono formal, jurídico y administrativo, como un acto emitido por una
 **[Lugar y fecha]**  
 **[Número o radicado del expediente]**
 
-## ANTECEDENTES
+## ANTECEDENTES (CENTRADO)
 Redacta un párrafo introductorio con esta fórmula:
 “Que mediante **Certificado de Estado de Cuenta N°____, expedido por la Subdirección Financiera del ..., se determinó la obligación a cargo de [nombre del deudor].”
 
-## CONSIDERANDO
-Expón brevemente:
-La competencia jurídica para el cobro coactivo (arts. 823 a 829 del Estatuto Tributario).  
-La existencia y ejecutoria del título ejecutivo, especificando:
-  (Pesos Colombianos)
-  Tipo de obligación (por ejemplo: contribución de valorización, impuesto, tasa o sanción).  
-  Número y fecha de la resolución** que impuso la obligación.  
-  Fecha de ejecutoria del acto administrativo.  
-  El monto adeudado y su fundamento normativo.
+## CONSIDERANDO (CENTRADO)
+Expón detalladamente:
+Lenguaje formal y jurídico-administrativo.
+
+Estructura numerada (“1. Que…”, “2. Que…”, etc.).
+
+Incluir las bases normativas: Estatuto Tributario Nacional (artículos 828, 837, 838, 839-1), Código General del Proceso (artículo 466) y Ley 1066 de 2006.
+
+Mencionar los datos del deudor o sociedad, el número de certificado, el valor de la deuda, el CHIP y la matrícula inmobiliaria.
+
+Concluir con la expresión: “En mérito de lo expuesto la abogada ejecutora,”.
 
 ## RESUELVE QUE
-Redacta párrafos que:
-- Ordenen al deudor el pago de la obligación dentro del plazo legal de diez (10) días hábiles contados a partir de la notificación del presente acto.  
-- Adviertan que, de no efectuarse el pago, se procederá al embargo y secuestro de bienes conforme a la ley.  
-- Indiquen expresamente que contra este acto no procede recurso alguno.
+Redacta detalladamente la parte resolutiva de un Mandamiento de Pago dentro de un proceso administrativo de cobro coactivo, siguiendo el formato jurídico oficial colombiano.
+Estructura el texto en numerales (PRIMERO, SEGUNDO, TERCERO...) donde se ordene:
+La expedición del mandamiento de pago (art. 826 E.T.N.), indicando el valor de la deuda, intereses, CHIP, matrícula inmobiliaria, dirección y nombre del deudor.
+El embargo de cuentas bancarias y valores (art. 838 E.T.N.).
+El embargo y secuestro del inmueble involucrado.
+La orden de librar los oficios correspondientes.
+La notificación personal del mandamiento (arts. 826 y 568 E.T.N.).
+La advertencia del plazo de 15 días para pagar o presentar excepciones (arts. 830 y 831 E.T.N.).
+La indicación de que no procede recurso alguno (art. 833-1 E.T.N.).
+Usa lenguaje formal, jurídico-administrativo, claro y conciso, coherente con los actos administrativos del IDU.
 
 ---
 
@@ -339,13 +347,13 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
     if (textoLimpio.startsWith("# ")) {
       return new Paragraph({
         alignment: AlignmentType.CENTER,
-        spacing: { after: 400, line: 360 }, // interlineado 1.5
+        spacing: { after: 200, line: 240 }, // sin interlineado
         children: [
           new TextRun({
             text: textoLimpio.replace(/^# /, ""),
             bold: true,
-            size: 32,
-            font: "Times New Roman",
+            size: 23, // 11.5 pt → *2 = 23*
+            font: "Arial",
           }),
         ],
       });
@@ -355,13 +363,13 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
     if (textoLimpio.startsWith("## ")) {
       return new Paragraph({
         alignment: AlignmentType.LEFT,
-        spacing: { after: 300, line: 360 }, // interlineado 1.5
+        spacing: { after: 150, line: 240 }, // sin interlineado
         children: [
           new TextRun({
             text: textoLimpio.replace(/^## /, ""),
             bold: true,
-            size: 28,
-            font: "Times New Roman",
+            size: 23, // 11.5 pt
+            font: "Arial",
           }),
         ],
       });
@@ -373,16 +381,20 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
         ? new TextRun({
             text: t,
             bold: true,
-            font: "Times New Roman",
-            size: 28,
+            font: "Arial",
+            size: 23,
           })
-        : new TextRun({ text: t, font: "Times New Roman", size: 28 })
+        : new TextRun({
+            text: t,
+            font: "Arial",
+            size: 23,
+          })
     );
 
     return new Paragraph({
       children: partes,
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 150, line: 360 }, // interlineado 1.5
+      spacing: { after: 100, line: 240 }, // sin interlineado
     });
   });
 
@@ -393,8 +405,30 @@ async function generarDocxDesdeMarkdown(texto, expediente_id, user_id) {
       {
         properties: {
           page: {
-            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }, // 2.5 cm de márgenes
+            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }, // 2.5 cm
           },
+        },
+        headers: {},
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: "Este documento está suscrito con firma mecánica autorizada mediante Resolución No. 400 de marzo 11 de 2021.   ",
+                    font: "Arial",
+                    size: 17, // 8.5 pt
+                  }),
+                  new TextRun({
+                    children: [PageNumber.CURRENT],
+                    font: "Arial",
+                    size: 17,
+                  }),
+                ],
+              }),
+            ],
+          }),
         },
         children: contenido,
       },
