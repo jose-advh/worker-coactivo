@@ -219,23 +219,28 @@ Debe tener tono formal, jurídico y administrativo, como un acto emitido por una
 #### FORMATO Y ESTILO:
 - El título principal debe ir centrado, en mayúsculas y negrita: “MANDAMIENTO DE PAGO No. MP-FechaHoy”. --- Debes cambiar fecha hoy por la fecha del dia de hoy
 - Usa subtítulos con # y ## 
-- Utiliza negritas para nombres, cargos, entidades y referencias legales importantes.
+- Utiliza negritas para nombres, montos de dinero, articulos, no más.
 - Usa lenguaje jurídico claro, preciso y solemne.
 - Evita frases genéricas o redundantes.
 - El resultado debe parecer un **acto administrativo oficial listo para imprimirse en Word**.
 
+
 #### ESTRUCTURA EXACTA:
 
+
 # MANDAMIENTO DE PAGO No. ___
+(Espacio)
 **[Nombre de la entidad pública]**  
 **[Lugar y fecha]**  
 **[Número o radicado del expediente]**
 
-## ANTECEDENTES (CENTRADO)
+# ANTECEDENTES 
+(Espacio)
 Redacta un párrafo introductorio con esta fórmula:
 “Que mediante **Certificado de Estado de Cuenta N°____, expedido por la Subdirección Financiera del ..., se determinó la obligación a cargo de [nombre del deudor].”
 
-## CONSIDERANDO (CENTRADO)
+# CONSIDERANDO 
+(Espacio)
 Expón detalladamente:
 Lenguaje formal y jurídico-administrativo.
 
