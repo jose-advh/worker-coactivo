@@ -10,6 +10,9 @@ import {
   TextRun,
   AlignmentType,
   Footer,
+  PageNumber,
+  HeadingLevel,
+  SectionType,
 } from "docx";
 
 const app = express();
