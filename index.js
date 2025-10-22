@@ -3,7 +3,14 @@ import mammoth from "mammoth";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import PDFParser from "pdf2json";
-import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  AlignmentType,
+  Footer,
+} from "docx";
 
 const app = express();
 app.use(express.json());
