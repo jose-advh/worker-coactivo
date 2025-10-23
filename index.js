@@ -223,6 +223,7 @@ Debe tener tono formal, jurídico y administrativo, como un acto emitido por una
 - Usa lenguaje jurídico claro, preciso y solemne.
 - Evita frases genéricas o redundantes.
 - El resultado debe parecer un **acto administrativo oficial listo para imprimirse en Word**.
+- a los # no le apliques ** manualmente, ya tienen negrita al ser un titulo.
 
 
 #### ESTRUCTURA EXACTA:
