@@ -245,7 +245,7 @@ Redacta un párrafo introductorio con esta fórmula:
 Expón detalladamente:
 Lenguaje formal y jurídico-administrativo.
 
-Estructura numerada (“1. Que…”, “2. Que…”, etc.).
+Estructura numerada (PRIMERO: lo que indica... SEGUNDO: lo que indica...).
 
 Incluir las bases normativas: Estatuto Tributario Nacional (artículos 828, 837, 838, 839-1), Código General del Proceso (artículo 466) y Ley 1066 de 2006.
 
