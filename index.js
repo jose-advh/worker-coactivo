@@ -245,7 +245,7 @@ Redacta un párrafo introductorio con esta fórmula:
 Expón detalladamente:
 Lenguaje formal y jurídico-administrativo.
 
-Estructura numerada (PRIMERO: lo que indica... SEGUNDO: lo que indica...).
+Estructura numerada (PRIMERO: lo que indica... SEGUNDO: LO QUE INDICA... debe estar en mayuscula por ejemplo: PRIMERO: LIBRAR MANDAMIENTO DE PAGO y luego en minuscula lo que sigue...).
 
 Incluir las bases normativas: Estatuto Tributario Nacional (artículos 828, 837, 838, 839-1), Código General del Proceso (artículo 466) y Ley 1066 de 2006.
 
